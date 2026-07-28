@@ -46,12 +46,14 @@ public class AuthService {
     }
 
     public String login(LoginRequest loginRequest) {
+        String lowerCaseEmail = loginRequest.email().toLowerCase();
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password())
+                new UsernamePasswordAuthenticationToken(lowerCaseEmail, loginRequest.password())
         );
 
-        User user = userRepository.findByEmail(loginRequest.email()).orElseThrow(() ->
-                new RuntimeException("User not found!"));
+        User user = userRepository.findByEmail(lowerCaseEmail).orElseThrow(() ->
+                new UsernameNotFoundException("User not found: " + lowerCaseEmail));
 
         return jwtUtils.generateToken(user);
     }
