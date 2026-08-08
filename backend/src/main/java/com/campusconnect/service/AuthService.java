@@ -30,8 +30,10 @@ public class AuthService {
         }
 
         Role requestedRole = registrationRequest.role();
-        if (requestedRole == Role.ADMIN) {
+        if (requestedRole != null && requestedRole == Role.ADMIN) {
             throw new IllegalArgumentException("You cannot register as an Admin!");
+        } else if (requestedRole == null) {
+            requestedRole = Role.STUDENT;
         }
 
         User user = User.builder()
@@ -53,7 +55,7 @@ public class AuthService {
         );
 
         User user = userRepository.findByEmail(lowerCaseEmail).orElseThrow(() ->
-                new UsernameNotFoundException("User not found: " + lowerCaseEmail));
+                new RuntimeException("User with email: " + lowerCaseEmail + " not found"));
 
         return jwtUtils.generateToken(user);
     }

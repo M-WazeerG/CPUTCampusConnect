@@ -15,7 +15,7 @@ import type { BackendErrorResponse } from '../types/apiResponses';
 import cputCampusImg from '../assets/district-6-campus.jpg';
 import Footer from "../components/Footer.tsx";
 import toast from "react-hot-toast";
-import {useNavigate, useLocation} from "react-router-dom";
+import {useNavigate, useLocation, Link} from "react-router-dom";
 
 type Role = 'STUDENT' | 'ORGANIZER' | 'ADMIN';
 
@@ -257,9 +257,9 @@ export default function Register() {
 
                         <div className="pt-2 text-center text-sm text-muted">
                             Already have an account?{' '}
-                            <a href="/login" className="font-bold text-brand-accent hover:underline">
+                            <Link to ="/login" className="font-bold text-brand-accent hover:underline">
                                 Login here
-                            </a>
+                            </Link>
                         </div>
                     </form>
                 </div>
