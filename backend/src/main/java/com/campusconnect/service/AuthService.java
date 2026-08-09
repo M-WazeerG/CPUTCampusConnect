@@ -9,6 +9,7 @@ import com.campusconnect.model.User;
 import com.campusconnect.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -50,12 +51,16 @@ public class AuthService {
     public String login(LoginRequest loginRequest) {
         String lowerCaseEmail = loginRequest.email().toLowerCase();
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(lowerCaseEmail, loginRequest.password())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(lowerCaseEmail, loginRequest.password())
+            );
+        } catch (Exception e) {
+            throw new BadCredentialsException("Invalid email or password");
+        }
 
         User user = userRepository.findByEmail(lowerCaseEmail).orElseThrow(() ->
-                new RuntimeException("User with email: " + lowerCaseEmail + " not found"));
+                new UsernameNotFoundException("User not found"));
 
         return jwtUtils.generateToken(user);
     }
