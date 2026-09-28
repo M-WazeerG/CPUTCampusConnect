@@ -1,12 +1,17 @@
-import { createBrowserRouter } from 'react-router-dom';
+import {createBrowserRouter} from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfileSettings from './pages/ProfileSettings';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
-import AppLayout from './components/AppLayout'; // <-- Import the Layout
+import AppLayout from './components/AppLayout';
+import RootRedirect from "./components/RootRedirect.tsx";
 
 export const router = createBrowserRouter([
+    {
+        path: '/',
+        element: <RootRedirect />,
+    },
     { path: '/login', element: <Login /> },
     { path: '/register', element: <Register /> },
 
