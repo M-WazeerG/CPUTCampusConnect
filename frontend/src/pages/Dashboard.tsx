@@ -136,7 +136,7 @@ export default function Dashboard() {
         navigate('/login', { replace: true });
     };
 
-    // RSVP Handler (toggle registration status & track capacity)
+    // RSVP Handler
     const handleRsvp = (eventId: string) => {
         setEvents((prev) =>
             prev.map((event) => {
@@ -259,7 +259,6 @@ export default function Dashboard() {
                             const isFull = registeredCount >= event.capacity;
                             const capacityPercent = Math.min(100, Math.round((registeredCount / event.capacity) * 100));
 
-                            // Support both date formats (backend eventDate vs sample date)
                             const displayDate = event.eventDate || event.date;
                             const displayTime = event.eventTime || event.time;
 
@@ -357,12 +356,10 @@ export default function Dashboard() {
                 )}
             </main>
 
-            {/* 2. Create Event Modal attached here! */}
             <CreateEventModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onEventCreated={(newEvent) => {
-                    // Prepend new event to the list in real-time
                     setEvents((prev) => [newEvent, ...prev]);
                 }}
             />
