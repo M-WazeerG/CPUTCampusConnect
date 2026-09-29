@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../services/axiosClient';
+import { isAxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import CreateEventModal from '../components/CreateEventModal';
 import type {UserProfile} from "../components/Navbar.tsx";
@@ -95,27 +96,36 @@ export default function Dashboard() {
     const [events, setEvents] = useState<CampusEvent[]>(SAMPLE_EVENTS);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
-    const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [userRes, eventsRes] = await Promise.all([
-                    axiosClient.get<UserProfile>('/api/users/me'),
-                    axiosClient.get<any[]>('/api/events'),
-                ]);
+                const userRes = await axiosClient.get<UserProfile>('/api/users/me');
                 setUser(userRes.data);
+            } catch (err) {
+                if (isAxiosError(err) && [401, 403].includes(err.response?.status ?? 0)) {
+                    toast.error('Session expired. Please log in again.');
+                    handleLogout();
+                    return;
+                }
 
-                // If backend has events stored, use them; otherwise keep sample events
-                if (eventsRes.data && eventsRes.data.length > 0) {
+                toast.error('Unable to load your profile.');
+            }
+
+            try {
+                const eventsRes = await axiosClient.get<CampusEvent[]>('/api/events');
+                if (eventsRes.data.length > 0) {
                     setEvents(eventsRes.data);
                 }
             } catch (err) {
-                toast.error('Session expired or server unreachable.');
-                handleLogout();
-            } finally {
-                setLoading(false);
+                if (isAxiosError(err) && [401, 403].includes(err.response?.status ?? 0)) {
+                    toast.error('Session expired. Please log in again.');
+                    handleLogout();
+                    return;
+                }
+
+                toast.error('Unable to load events. Please try again later.');
             }
         };
 
@@ -131,6 +141,21 @@ export default function Dashboard() {
 
     // RSVP Handler
     const handleRsvp = (eventId: string) => {
+        const eventToUpdate = events.find((event) => event.id === eventId);
+        if (!eventToUpdate) return;
+
+        const currentCount = eventToUpdate.registeredCount || 0;
+        if (!eventToUpdate.isRegistered && currentCount >= eventToUpdate.capacity) {
+            toast.error('This event is fully booked.');
+            return;
+        }
+
+        toast.success(
+            eventToUpdate.isRegistered
+                ? `Cancelled registration for: ${eventToUpdate.title}`
+                : `Successfully RSVP'd for: ${eventToUpdate.title}`
+        );
+
         setEvents((prev) =>
             prev.map((event) => {
                 if (event.id !== eventId) return event;
@@ -138,20 +163,12 @@ export default function Dashboard() {
                 const currentCount = event.registeredCount || 0;
 
                 if (event.isRegistered) {
-                    // Cancel RSVP
-                    toast.success(`Cancelled registration for: ${event.title}`);
                     return {
                         ...event,
                         isRegistered: false,
                         registeredCount: Math.max(0, currentCount - 1),
                     };
                 } else {
-                    // Register RSVP
-                    if (currentCount >= event.capacity) {
-                        toast.error('This event is fully booked.');
-                        return event;
-                    }
-                    toast.success(`Successfully RSVP'd for: ${event.title}`);
                     return {
                         ...event,
                         isRegistered: true,

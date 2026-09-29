@@ -43,7 +43,7 @@ public class EventService {
     }
 
     public List<EventResponse> getAllUpcomingEvents() {
-        return eventRepository.findByEventDateGreaterThanEqualOrderByEventDateAsc(LocalDate.now())
+        return eventRepository.findUpcomingEventsWithOrganizer(LocalDate.now())
                 .stream()
                 .map(this::mapToResponse)
                 .toList();

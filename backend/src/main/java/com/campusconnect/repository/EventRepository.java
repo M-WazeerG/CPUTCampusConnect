@@ -3,6 +3,7 @@ package com.campusconnect.repository;
 import com.campusconnect.model.Event;
 import com.campusconnect.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -14,5 +15,12 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     List<Event> findByOrganizer(User organizer);
 
-    List<Event> findByEventDateGreaterThanEqualOrderByEventDateAsc(LocalDate date);
+    @Query("""
+            select e
+            from Event e
+            join fetch e.organizer
+            where e.eventDate >= :date
+            order by e.eventDate asc
+            """)
+    List<Event> findUpcomingEventsWithOrganizer(LocalDate date);
 }
