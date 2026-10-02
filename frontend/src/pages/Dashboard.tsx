@@ -84,6 +84,11 @@ export default function Dashboard() {
 
     // RSVP Handler
     const handleRsvp = async (eventId: string) => {
+        if (user?.role === 'ORGANIZER') {
+            toast.error('Organizers cannot RSVP to events.');
+            return;
+        }
+
         const eventToUpdate = events.find((event) => event.id === eventId);
         if (!eventToUpdate) return;
 
@@ -267,6 +272,11 @@ export default function Dashboard() {
                                         </div>
 
                                         {/* RSVP / Action Button */}
+                                        {user?.role === 'ORGANIZER' ? (
+                                            <div className="w-full rounded-lg bg-gray-100 py-2.5 text-center text-xs font-bold text-gray-400">
+                                                Organizers cannot RSVP
+                                            </div>
+                                        ) : (
                                         <button
                                             onClick={() => handleRsvp(event.id)}
                                             disabled={isFull && !event.isRegistered}
@@ -289,6 +299,7 @@ export default function Dashboard() {
                                                 'RSVP Now'
                                             )}
                                         </button>
+                                        )}
                                     </div>
 
                                 </div>
