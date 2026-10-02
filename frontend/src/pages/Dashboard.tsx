@@ -28,64 +28,9 @@ interface CampusEvent {
     venue: string;
     organizerName: string;
     capacity: number;
-    registeredCount?: number;
-    isRegistered?: boolean;
+    registeredCount: number;
+    isRegistered: boolean;
 }
-
-const SAMPLE_EVENTS: CampusEvent[] = [
-    {
-        id: '1',
-        title: 'CPUT Annual Career & Tech Fair 2026',
-        description: 'Connect with top tech companies, software houses, and graduate recruiters across Cape Town.',
-        category: 'Career',
-        date: '2026-08-15',
-        time: '10:00 - 15:00',
-        venue: 'Cape Town Campus, Multi-Purpose Hall',
-        organizerName: 'CPUT Careers Office',
-        capacity: 200,
-        registeredCount: 188,
-        isRegistered: false,
-    },
-    {
-        id: '2',
-        title: 'Spring Boot & Microservices Workshop',
-        description: 'Hands-on coding session covering Spring Boot 3, RESTful APIs, and relational database persistence.',
-        category: 'Workshop',
-        date: '2026-08-18',
-        time: '13:00 - 16:30',
-        venue: 'Informatics & Design Lab 3.12',
-        organizerName: 'Developer Student Club',
-        capacity: 40,
-        registeredCount: 40,
-        isRegistered: false,
-    },
-    {
-        id: '3',
-        title: 'Faculty Hackathon: Smart Campus Solutions',
-        description: 'Build real-world web and mobile applications addressing campus challenges. Great prizes to be won!',
-        category: 'Academic',
-        date: '2026-08-25',
-        time: '09:00 - 18:00',
-        venue: 'Engineering Auditorium',
-        organizerName: 'Faculty of Informatics',
-        capacity: 80,
-        registeredCount: 32,
-        isRegistered: true,
-    },
-    {
-        id: '4',
-        title: 'Inter-Campus Basketball Tournament',
-        description: 'Bellville vs. District Six campus varsity face-off. Come support your campus team!',
-        category: 'Sports',
-        date: '2026-08-28',
-        time: '15:00 - 18:00',
-        venue: 'Bellville Sports Complex',
-        organizerName: 'Sports Council',
-        capacity: 150,
-        registeredCount: 75,
-        isRegistered: false,
-    },
-];
 
 const CATEGORIES = ['All', 'Career', 'Academic', 'Workshop', 'Sports', 'Social'];
 
@@ -93,7 +38,7 @@ export default function Dashboard() {
     const navigate = useNavigate();
 
     const [user, setUser] = useState<UserProfile | null>(null);
-    const [events, setEvents] = useState<CampusEvent[]>(SAMPLE_EVENTS);
+    const [events, setEvents] = useState<CampusEvent[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -115,9 +60,7 @@ export default function Dashboard() {
 
             try {
                 const eventsRes = await axiosClient.get<CampusEvent[]>('/api/events');
-                if (eventsRes.data.length > 0) {
-                    setEvents(eventsRes.data);
-                }
+                setEvents(eventsRes.data);
             } catch (err) {
                 if (isAxiosError(err) && [401, 403].includes(err.response?.status ?? 0)) {
                     toast.error('Session expired. Please log in again.');
@@ -140,43 +83,32 @@ export default function Dashboard() {
     };
 
     // RSVP Handler
-    const handleRsvp = (eventId: string) => {
+    const handleRsvp = async (eventId: string) => {
         const eventToUpdate = events.find((event) => event.id === eventId);
         if (!eventToUpdate) return;
 
-        const currentCount = eventToUpdate.registeredCount || 0;
+        const currentCount = eventToUpdate.registeredCount;
         if (!eventToUpdate.isRegistered && currentCount >= eventToUpdate.capacity) {
             toast.error('This event is fully booked.');
             return;
         }
 
-        toast.success(
-            eventToUpdate.isRegistered
-                ? `Cancelled registration for: ${eventToUpdate.title}`
-                : `Successfully RSVP'd for: ${eventToUpdate.title}`
-        );
-
-        setEvents((prev) =>
-            prev.map((event) => {
-                if (event.id !== eventId) return event;
-
-                const currentCount = event.registeredCount || 0;
-
-                if (event.isRegistered) {
-                    return {
-                        ...event,
-                        isRegistered: false,
-                        registeredCount: Math.max(0, currentCount - 1),
-                    };
-                } else {
-                    return {
-                        ...event,
-                        isRegistered: true,
-                        registeredCount: currentCount + 1,
-                    };
-                }
-            })
-        );
+        try {
+            const response = eventToUpdate.isRegistered
+                ? await axiosClient.delete<CampusEvent>(`/api/events/${eventId}/rsvp`)
+                : await axiosClient.post<CampusEvent>(`/api/events/${eventId}/rsvp`);
+            setEvents((prev) => prev.map((event) => event.id === eventId ? response.data : event));
+            toast.success(
+                eventToUpdate.isRegistered
+                    ? `Cancelled registration for: ${eventToUpdate.title}`
+                    : `Successfully RSVP'd for: ${eventToUpdate.title}`
+            );
+        } catch (err: unknown) {
+            const message = isAxiosError<{ message?: string }>(err)
+                ? err.response?.data?.message || 'Unable to update your RSVP.'
+                : 'Unable to update your RSVP.';
+            toast.error(message);
+        }
     };
 
     // Filter events based on search keyword and category tab
@@ -265,7 +197,7 @@ export default function Dashboard() {
                 ) : (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {filteredEvents.map((event) => {
-                            const registeredCount = event.registeredCount || 0;
+                            const registeredCount = event.registeredCount;
                             const isFull = registeredCount >= event.capacity;
                             const capacityPercent = Math.min(100, Math.round((registeredCount / event.capacity) * 100));
 
