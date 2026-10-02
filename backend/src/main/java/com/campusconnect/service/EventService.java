@@ -5,10 +5,12 @@ import com.campusconnect.dto.response.EventResponse;
 import com.campusconnect.model.Event;
 import com.campusconnect.model.EventRegistration;
 import com.campusconnect.model.User;
+import com.campusconnect.model.Role;
 import com.campusconnect.repository.EventRepository;
 import com.campusconnect.repository.EventRegistrationRepository;
 import com.campusconnect.repository.UserRepository;
 import com.campusconnect.exception.EventCapacityExceededException;
+import com.campusconnect.exception.OrganizerRsvpNotAllowedException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -81,6 +83,9 @@ public class EventService {
     @Transactional
     public EventResponse register(UUID eventId, String userEmail) {
         User user = findUser(userEmail);
+        if (user.getRole() == Role.ORGANIZER) {
+            throw new OrganizerRsvpNotAllowedException();
+        }
         Event event = eventRepository.findByIdForUpdate(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event not found with ID: " + eventId));
 
