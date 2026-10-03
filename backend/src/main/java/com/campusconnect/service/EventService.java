@@ -80,6 +80,14 @@ public class EventService {
         return mapToResponse(event, registrationRepository.existsByEventIdAndUser(id, user));
     }
 
+    public List<EventResponse> getMyRsvps(String userEmail) {
+        User user = findUser(userEmail);
+        return registrationRepository.findByUserWithEventAndOrganizer(user)
+                .stream()
+                .map(registration -> mapToResponse(registration.getEvent(), true))
+                .toList();
+    }
+
     @Transactional
     public EventResponse register(UUID eventId, String userEmail) {
         User user = findUser(userEmail);

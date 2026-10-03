@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -20,7 +21,7 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from Event e where e.id = :id")
-    java.util.Optional<Event> findByIdForUpdate(@Param("id") UUID id);
+    Optional<Event> findByIdForUpdate(@Param("id") UUID id);
 
     @Query("""
             select e
