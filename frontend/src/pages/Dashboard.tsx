@@ -271,7 +271,6 @@ export default function Dashboard() {
                                             </div>
                                         </div>
 
-                                        {/* RSVP / Action Button */}
                                         {user?.role === 'ORGANIZER' ? (
                                             <div className="w-full rounded-lg bg-gray-100 py-2.5 text-center text-xs font-bold text-gray-400">
                                                 Organizers cannot RSVP

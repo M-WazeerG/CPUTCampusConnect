@@ -49,6 +49,12 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventsByOrganizer(organizerEmail));
     }
 
+    @GetMapping("/my-rsvps")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<EventResponse>> getMyRsvps(Authentication authentication) {
+        return ResponseEntity.ok(eventService.getMyRsvps(authentication.getName()));
+    }
+
     @PostMapping("/{id}/rsvp")
     public ResponseEntity<EventResponse> register(@PathVariable UUID id, Authentication authentication) {
         return ResponseEntity.ok(eventService.register(id, authentication.getName()));
