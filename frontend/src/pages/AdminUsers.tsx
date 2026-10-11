@@ -126,7 +126,7 @@ export default function AdminUsers() {
                         User & Role Management
                     </h1>
                     <p className="mt-1 text-sm text-muted">
-                        Inspect all provisioned accounts, verify and grant organizer status, or delete accounts [2].
+                        Inspect all provisioned accounts, verify and grant organizer status, or delete accounts.
                     </p>
                 </div>
 

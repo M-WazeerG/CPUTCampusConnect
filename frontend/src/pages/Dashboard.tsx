@@ -9,7 +9,7 @@ import {
     Clock,
     Filter,
 } from 'lucide-react';
-import {Link, useOutletContext} from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import axiosClient from '../services/axiosClient';
 import { isAxiosError } from 'axios';
 import toast from 'react-hot-toast';
@@ -21,6 +21,7 @@ interface CampusEvent {
     description: string;
     category: string;
     campus: string;
+    imageUrl?: string;
     eventDate: string;
     eventTime: string;
     venue: string;
@@ -46,7 +47,6 @@ const CAMPUS_DISPLAY_NAMES: Record<string, string> = {
     ONLINE: 'Online',
 };
 
-
 const CAMPUSES = [
     'All',
     'District Six',
@@ -57,8 +57,6 @@ const CAMPUSES = [
     'Athlone',
     'Online',
 ];
-
-
 
 const formatDate = (dateStr: string) => {
     try {
@@ -252,9 +250,21 @@ export default function Dashboard() {
                                     className="flex flex-col justify-between rounded-2xl border border-ui-border bg-card p-6 shadow-subtle hover:shadow-md transition-shadow"
                                 >
                                     <div>
+                                        {event.imageUrl && event.imageUrl.trim() !== '' && (
+                                            <div className="mb-4 h-40 w-full overflow-hidden rounded-xl border border-ui-border/60 bg-gray-100">
+                                                <img
+                                                    src={event.imageUrl}
+                                                    alt={event.title}
+                                                    className="h-full w-full object-cover"
+                                                    onError={(e) => {
+                                                        (e.currentTarget.parentElement as HTMLElement).style.display = 'none';
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
                                         {/* Top Row: Category Tag & Date */}
                                         <div className="flex items-center justify-between gap-2 mb-3">
-                                            {/* Fixed typo: removed stray 'f' */}
                                             <span className="rounded-md bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-brand-primary uppercase tracking-wide">
                                                 {event.category}
                                             </span>

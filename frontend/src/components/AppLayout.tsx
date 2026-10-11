@@ -44,7 +44,7 @@ export default function AppLayout() {
             <Navbar user={user} />
 
             <div className="flex-1">
-                <Outlet context={{ user }} />
+                <Outlet context={{ user, setUser }} />
             </div>
 
             <Footer />
