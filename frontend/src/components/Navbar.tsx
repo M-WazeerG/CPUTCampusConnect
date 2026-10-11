@@ -8,17 +8,11 @@ import {
     BookmarkCheck,
     ShieldCheck,
     Menu,
-    X
+    X, BarChart3
 } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
-
-export interface UserProfile {
-    userId: string;
-    fullName: string;
-    email: string;
-    role: 'STUDENT' | 'ORGANIZER' | 'ADMIN';
-}
+import type {UserProfile} from "../types/apiResponses.ts";
 
 interface NavbarProps {
     user: UserProfile | null;
@@ -75,35 +69,56 @@ export default function Navbar({ user }: NavbarProps) {
 
                         {/* Student specific link */}
                         {user.role === 'STUDENT' && (
-                            <button
-                                onClick={() => toast('My RSVPs view is coming soon!')}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-muted hover:text-brand-primary hover:bg-gray-100 transition-colors cursor-pointer"
+                            <Link
+                                to="/my-rsvps"
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                                    isActive('/my-rsvps')
+                                        ? 'bg-blue-50 text-brand-primary'
+                                        : 'text-muted hover:text-brand-primary hover:bg-gray-100'
+                                }`}
                             >
                                 <BookmarkCheck className="h-4 w-4" />
                                 My RSVPs
-                            </button>
+                            </Link>
                         )}
 
                         {/* Organizer specific link */}
                         {user.role === 'ORGANIZER' && (
-                            <button
-                                onClick={() => toast('Event Creation modal is coming in the next step!')}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-brand-accent hover:bg-orange-50 transition-colors cursor-pointer"
-                            >
-                                <Plus className="h-4 w-4" />
-                                Create Event
-                            </button>
+                            <>
+                                <Link
+                                    to="/organizer/events"
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                                        isActive('/organizer/events')
+                                            ? 'bg-blue-50 text-brand-primary'
+                                            : 'text-muted hover:text-brand-primary hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <BarChart3 className="h-4 w-4" />
+                                    My Events
+                                </Link>
+                                <Link
+                                    to="/events/create"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-brand-accent hover:bg-orange-50 transition-colors"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Create Event
+                                </Link>
+                            </>
                         )}
 
                         {/* Admin specific link */}
                         {user.role === 'ADMIN' && (
-                            <button
-                                onClick={() => toast('Admin Portal view coming soon!')}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-purple-700 hover:bg-purple-50 transition-colors cursor-pointer"
+                            <Link
+                                to="/admin/dashboard"
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                                    isActive('/admin/dashboard')
+                                        ? 'bg-purple-50 text-purple-800'
+                                        : 'text-purple-700 hover:bg-purple-50'
+                                }`}
                             >
                                 <ShieldCheck className="h-4 w-4" />
-                                Admin Panel
-                            </button>
+                                Admin Portal
+                            </Link>
                         )}
                     </nav>
                 )}
@@ -189,17 +204,25 @@ export default function Navbar({ user }: NavbarProps) {
                     >
                         Explore Events
                     </Link>
+                    {user.role === 'STUDENT' && (
+                        <Link
+                            to="/my-rsvps"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block py-1.5 text-xs font-semibold text-brand-primary"
+                        >
+                            My RSVPs
+                        </Link>
+                    )}
                     {user.role === 'ORGANIZER' && (
-                        <button
-                            onClick={() => {
-                                setMobileMenuOpen(false);
-                                toast('Event Creation coming next!');
-                            }}
-                            className="block w-full text-left py-1.5 text-xs font-semibold text-brand-accent"
+                        <Link
+                            to="/events/create"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block py-1.5 text-xs font-semibold text-brand-accent"
                         >
                             Create New Event
-                        </button>
+                        </Link>
                     )}
+
                     <Link
                         to="/settings"
                         onClick={() => setMobileMenuOpen(false)}

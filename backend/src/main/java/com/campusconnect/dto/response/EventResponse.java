@@ -1,5 +1,6 @@
 package com.campusconnect.dto.response;
 
+import com.campusconnect.model.Campus;
 import com.campusconnect.model.EventCategory;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -9,10 +10,14 @@ public record EventResponse(
         String title,
         String description,
         EventCategory category,
+        Campus campus,
+        String imageUrl,
         LocalDate eventDate,
         String eventTime,
         String venue,
         Integer capacity,
+        Integer registeredCount,
+        boolean isRegistered,
         String organizerName,
         String organizerEmail
 ) {}

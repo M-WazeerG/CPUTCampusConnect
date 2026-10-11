@@ -31,6 +31,13 @@ public class Event {
     @Column(nullable = false)
     private EventCategory category;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Campus campus;
+
+    @Column(length = 500)
+    private String imageUrl;
+
     @Column(nullable = false)
     private LocalDate eventDate;
 
@@ -42,6 +49,10 @@ public class Event {
 
     @Column(nullable = false)
     private Integer capacity;
+
+    @Column(nullable = false, columnDefinition = "int default 0")
+    @Builder.Default
+    private Integer registeredCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizer_id", nullable = false)
